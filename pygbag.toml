@@ -1,0 +1,35 @@
+# Pygbag configuration for Undertale Clone
+# This file configures the WebAssembly build settings
+
+[app]
+name = "Undertale Clone"
+version = "1.0.0"
+description = "A pixel-perfect recreation of Undertale using Python and Pygame"
+
+[build]
+# Main entry point for the game
+entry = "main_web.py"
+
+# Canvas dimensions (matches the game's native resolution)
+width = 640
+height = 480
+
+# Enable fullscreen button
+fullscreen = true
+
+# Title shown in browser tab
+title = "Undertale Clone"
+
+[assets]
+# Include all necessary asset directories
+include = ["sprites", "fonts", "mus", "sfx"]
+
+# Exclude unnecessary files
+exclude = ["decompilation", ".git", "*.pyc", "__pycache__"]
+
+[optimization]
+# Compression level for assets (0-9, higher = smaller but slower build)
+compression = 6
+
+# Enable asset caching
+cache_assets = true

@@ -1,2 +1,32 @@
 undertale.ini
 file0
+
+# Build artifacts
+build/
+dist/
+*.wasm
+*.js.map
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pygbag/Emscripten build
+.pygbag/
+web/
+*.data
+*.html.mem

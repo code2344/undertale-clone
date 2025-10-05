@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undertale Clone - Test Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #ffff00;
+        }
+        .status {
+            background-color: #2a2a2a;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+        .info-box {
+            background-color: #2a2a2a;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+        .info-box h2 {
+            margin-top: 0;
+            color: #00ff00;
+        }
+        code {
+            background-color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #00ff00;
+        }
+        .command {
+            background-color: #000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #00ff00;
+        }
+        a {
+            color: #00aaff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Undertale Clone - Browser Test Page</h1>
+        
+        <div class="status">
+            <strong>Status:</strong> This is a test page for local development. The actual game will be built using Pygbag.
+        </div>
+        
+        <div class="info-box">
+            <h2>📋 Build Instructions</h2>
+            <p>To build the browser version of this game:</p>
+            
+            <p><strong>1. Install Pygbag:</strong></p>
+            <div class="command">pip install pygbag</div>
+            
+            <p><strong>2. Build the game:</strong></p>
+            <div class="command">pygbag --build .</div>
+            
+            <p><strong>3. Test locally:</strong></p>
+            <div class="command">python3 -m http.server 8000 --directory build/web</div>
+            
+            <p>Then navigate to <code>http://localhost:8000</code></p>
+        </div>
+        
+        <div class="info-box">
+            <h2>🚀 Quick Start</h2>
+            <p>For easier building, use the provided build script:</p>
+            <div class="command">./build.sh</div>
+        </div>
+        
+        <div class="info-box">
+            <h2>📚 Documentation</h2>
+            <p>For detailed instructions, see:</p>
+            <ul>
+                <li><a href="BROWSER_BUILD.md">BROWSER_BUILD.md</a> - Complete browser build guide</li>
+                <li><a href="README.md">README.md</a> - General project documentation</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h2>🌐 Browser Requirements</h2>
+            <p>The WebAssembly version requires a modern browser:</p>
+            <ul>
+                <li>Chrome/Chromium 90+</li>
+                <li>Firefox 88+</li>
+                <li>Edge 90+</li>
+                <li>Safari 14+</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h2>⚙️ How It Works</h2>
+            <p>This project uses:</p>
+            <ul>
+                <li><strong>Pygbag:</strong> Compiles Python/Pygame to WebAssembly</li>
+                <li><strong>Emscripten:</strong> Provides the Python runtime in the browser</li>
+                <li><strong>WebAssembly:</strong> Enables near-native performance</li>
+                <li><strong>Pygame-ce:</strong> Browser-compatible version of Pygame</li>
+            </ul>
+        </div>
+        
+        <div class="status">
+            <strong>Note:</strong> If you see this page after building, make sure you're viewing the built output in <code>build/web/index.html</code>, not this test page.
+        </div>
+    </div>
+</body>
+</html>
