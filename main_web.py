@@ -15,6 +15,13 @@ try:
 except:
     IS_WASM = False
 
+# Check if we're running in a Pygbag environment
+try:
+    import pygbag
+    IS_PYGBAG = True
+except ImportError:
+    IS_PYGBAG = False
+
 # Import the main module
 import main
 
@@ -33,7 +40,8 @@ async def async_maincycle():
             globals.room.draw()
         
         # Yield control back to browser in WebAssembly environment
-        if IS_WASM:
+        # This prevents the browser from freezing during the game loop
+        if IS_WASM or IS_PYGBAG:
             await asyncio.sleep(0)
         
 
@@ -66,8 +74,8 @@ async def async_main():
 
 if __name__ == "__main__":
     # Run async main loop
-    if IS_WASM:
-        # In WebAssembly, use asyncio
+    if IS_WASM or IS_PYGBAG:
+        # In WebAssembly/Pygbag, use asyncio
         asyncio.run(async_main())
     else:
         # Fallback to sync version for native execution
@@ -78,3 +86,4 @@ if __name__ == "__main__":
             print(f"Error: {e}")
             import traceback
             traceback.print_exc()
+

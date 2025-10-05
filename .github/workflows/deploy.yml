@@ -28,16 +28,31 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
       
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pygbag
       
+      - name: Check compatibility
+        run: |
+          python3 check_compatibility.py
+      
       - name: Build WebAssembly version
         run: |
           # Pygbag builds the game for web
-          pygbag --build --template noctx.tmpl .
+          # --build: Create production build
+          # --template noctx.tmpl: Use no-context template for better compatibility
+          # --archive: Name of the output archive
+          pygbag --build --template noctx.tmpl --archive undertale-clone .
+      
+      - name: Verify build output
+        run: |
+          echo "Build complete. Checking output..."
+          ls -la build/web/
+          echo "Build size:"
+          du -sh build/web/
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -55,3 +70,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      
+      - name: Display deployment URL
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "🌐 Game is now live at: ${{ steps.deployment.outputs.page_url }}"
