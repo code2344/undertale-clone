@@ -33,8 +33,7 @@ echo ""
 # Build the game using pygbag
 # --build: Build mode (as opposed to dev/serve mode)
 # --template noctx.tmpl: Use no-context template (better compatibility)
-# --archive undertale-clone: Name of the output archive
-pygbag --build --template noctx.tmpl --archive undertale-clone .
+pygbag --build --template noctx.tmpl .
 
 echo ""
 echo "✅ Build complete!"

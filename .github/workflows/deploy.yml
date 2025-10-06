@@ -44,8 +44,7 @@ jobs:
           # Pygbag builds the game for web
           # --build: Create production build
           # --template noctx.tmpl: Use no-context template for better compatibility
-          # --archive: Name of the output archive
-          pygbag --build --template noctx.tmpl --archive undertale-clone .
+          pygbag --build --template noctx.tmpl .
       
       - name: Verify build output
         run: |
