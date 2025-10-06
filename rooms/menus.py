@@ -49,7 +49,7 @@ class room_introstory(Menu):
             pygame.mixer.music.load("mus/mus_story_91.ogg")
             pygame.mixer.music.play()
             self.show_intro()
-            globals.chara.go_to_room(rooms.Room_TEST1())
+            globals.chara.go_to_room(rooms.Room_Ruins_Start())
 
     def show_intro(self):
         self.text_layer.show()
@@ -130,7 +130,7 @@ class room_f_intro(Menu):
             pygame.mixer.music.load("mus/mus_story_91.ogg")
             pygame.mixer.music.play()
             self.show_intro()
-            globals.chara.go_to_room(rooms.Room_TEST1())
+            globals.chara.go_to_room(rooms.Room_Ruins_Start())
 
     def show_intro(self):
         def update(s: pygame.Surface, d: draw.Layer):
