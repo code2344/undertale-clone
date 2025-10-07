@@ -36,6 +36,10 @@ echo ""
 pygbag --build --template noctx.tmpl .
 
 echo ""
+echo "🎨 Enhancing web build with loading bar and error console..."
+python3 enhance_web_build.py
+
+echo ""
 echo "✅ Build complete!"
 echo ""
 echo "📁 Output directory: build/web/"

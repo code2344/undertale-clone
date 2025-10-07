@@ -10,6 +10,9 @@ description = "A pixel-perfect recreation of Undertale using Python and Pygame"
 # Main entry point for the game
 entry = "main_web.py"
 
+# Custom HTML template with loading bar and error console
+template = "web_template.html"
+
 # Canvas dimensions (matches the game's native resolution)
 width = 640
 height = 480
