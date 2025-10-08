@@ -45,6 +45,25 @@ The WebAssembly version works on:
 - Edge 90+
 - Safari 14+
 
+### Troubleshooting
+
+If you experience loading errors (including 1401 errors):
+
+1. **Run the diagnostic tool:**
+   ```bash
+   python3 diagnose_1401_errors.py
+   ```
+
+2. **Common fixes:**
+   - Clear browser cache (Ctrl+Shift+Delete)
+   - Try a different browser
+   - Check your internet connection
+   - The game automatically uses CDN fallback for reliability
+
+3. **For more help, see:**
+   - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Comprehensive troubleshooting guide
+   - [Browser Console](https://developer.chrome.com/docs/devtools/open/) (F12) - Check for specific error messages
+
 ## Features
 
 - Pixel-perfect recreation of Undertale gameplay
