@@ -534,6 +534,20 @@
                     loadingManager.complete();
                 }
             },
+            showError: (message) => {
+                if (errorConsole) {
+                    errorConsole.log(message, 'error');
+                }
+                // Also show in loading screen if still visible
+                const loadingStatus = document.getElementById('loading-status');
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = `
+                        <div style="color: #ff4444; padding: 10px;">
+                            <strong>❌ Error:</strong> ${message}
+                        </div>
+                    `;
+                }
+            },
             logError: (message) => {
                 if (errorConsole) {
                     errorConsole.log(message, 'error');
@@ -549,6 +563,21 @@
                     errorConsole.log(message, 'info');
                 }
             }
+        };
+
+        // Monitor for CDN errors
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            return originalFetch.apply(this, args).catch(error => {
+                // Log CDN fetch errors
+                if (args[0] && (args[0].includes('cdn.jsdelivr') || args[0].includes('cdnjs'))) {
+                    console.error('CDN fetch error:', error);
+                    if (window.gameAPI) {
+                        window.gameAPI.logError(`CDN error: ${error.message}`);
+                    }
+                }
+                throw error;
+            });
         };
     </script>
 

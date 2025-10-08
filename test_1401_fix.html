@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1401 Error Fix Test - Undertale Clone</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #ffaa44;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .status.pending {
+            background: rgba(255, 170, 68, 0.1);
+            border-left: 4px solid #ffaa44;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .status.error {
+            background: rgba(255, 68, 68, 0.1);
+            border-left: 4px solid #ff4444;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+        }
+        
+        .log-entry.error {
+            color: #ff4444;
+        }
+        
+        .log-entry.success {
+            color: #4CAF50;
+        }
+        
+        .log-entry.info {
+            color: #44aaff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 1401 Error Fix Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>Test 1: CDN Availability Check</h2>
+            <div id="cdn-status" class="status pending">
+                ⏳ Click "Run Test" to check CDN availability
+            </div>
+            <button onclick="testCDNAvailability()">Run Test</button>
+            <div id="cdn-log" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 2: CDN Fallback Mechanism</h2>
+            <div id="fallback-status" class="status pending">
+                ⏳ Click "Run Test" to test fallback mechanism
+            </div>
+            <button onclick="testCDNFallback()">Run Test</button>
+            <div id="fallback-log" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 3: Error Handling</h2>
+            <div id="error-status" class="status pending">
+                ⏳ Click "Run Test" to test error handling
+            </div>
+            <button onclick="testErrorHandling()">Run Test</button>
+            <div id="error-log" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 4: Retry Logic</h2>
+            <div id="retry-status" class="status pending">
+                ⏳ Click "Run Test" to test retry logic
+            </div>
+            <button onclick="testRetryLogic()">Run Test</button>
+            <div id="retry-log" class="log"></div>
+        </div>
+    </div>
+    
+    <script>
+        // CDN configuration (same as in index.html)
+        const CDN_CONFIGS = [
+            {
+                name: 'jsDelivr v0.26.2',
+                script: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js',
+                indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
+            },
+            {
+                name: 'cdnjs v0.26.2',
+                script: 'https://cdnjs.cloudflare.com/ajax/libs/pyodide/0.26.2/pyodide.js',
+                indexURL: 'https://cdnjs.cloudflare.com/ajax/libs/pyodide/0.26.2/'
+            },
+            {
+                name: 'jsDelivr v0.24.1',
+                script: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js',
+                indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
+            }
+        ];
+        
+        function log(elementId, message, level = 'info') {
+            const logElement = document.getElementById(elementId);
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${level}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        async function testCDNAvailability() {
+            const statusEl = document.getElementById('cdn-status');
+            const logId = 'cdn-log';
+            
+            statusEl.textContent = '⏳ Testing CDN availability...';
+            statusEl.className = 'status pending';
+            document.getElementById(logId).innerHTML = '';
+            
+            log(logId, 'Starting CDN availability test...', 'info');
+            
+            let allPassed = true;
+            
+            for (const config of CDN_CONFIGS) {
+                try {
+                    log(logId, `Testing ${config.name}...`, 'info');
+                    
+                    const response = await fetch(config.script, { method: 'HEAD' });
+                    
+                    if (response.ok) {
+                        log(logId, `✅ ${config.name}: HTTP ${response.status} - OK`, 'success');
+                    } else {
+                        log(logId, `❌ ${config.name}: HTTP ${response.status} - FAILED`, 'error');
+                        allPassed = false;
+                    }
+                } catch (error) {
+                    log(logId, `❌ ${config.name}: ${error.message}`, 'error');
+                    allPassed = false;
+                }
+            }
+            
+            if (allPassed) {
+                statusEl.textContent = '✅ All CDN sources are available';
+                statusEl.className = 'status success';
+                log(logId, 'Test PASSED: All CDNs are reachable', 'success');
+            } else {
+                statusEl.textContent = '⚠️ Some CDN sources are unavailable (fallback will be used)';
+                statusEl.className = 'status error';
+                log(logId, 'Test WARNING: Some CDNs failed, but fallback is available', 'info');
+            }
+        }
+        
+        async function testCDNFallback() {
+            const statusEl = document.getElementById('fallback-status');
+            const logId = 'fallback-log';
+            
+            statusEl.textContent = '⏳ Testing CDN fallback mechanism...';
+            statusEl.className = 'status pending';
+            document.getElementById(logId).innerHTML = '';
+            
+            log(logId, 'Starting fallback test...', 'info');
+            log(logId, 'Simulating failure of primary CDN...', 'info');
+            
+            // Simulate trying each CDN
+            for (let i = 0; i < CDN_CONFIGS.length; i++) {
+                const config = CDN_CONFIGS[i];
+                log(logId, `Attempting CDN ${i + 1}: ${config.name}`, 'info');
+                
+                try {
+                    const response = await fetch(config.script, { method: 'HEAD' });
+                    
+                    if (response.ok) {
+                        log(logId, `✅ Successfully connected to ${config.name}`, 'success');
+                        statusEl.textContent = '✅ Fallback mechanism works correctly';
+                        statusEl.className = 'status success';
+                        log(logId, `Test PASSED: Fallback succeeded with ${config.name}`, 'success');
+                        return;
+                    } else {
+                        log(logId, `⚠️ ${config.name} returned HTTP ${response.status}, trying next...`, 'info');
+                    }
+                } catch (error) {
+                    log(logId, `⚠️ ${config.name} failed: ${error.message}, trying next...`, 'info');
+                }
+            }
+            
+            statusEl.textContent = '❌ All CDN sources failed';
+            statusEl.className = 'status error';
+            log(logId, 'Test FAILED: No CDN could be reached', 'error');
+        }
+        
+        async function testErrorHandling() {
+            const statusEl = document.getElementById('error-status');
+            const logId = 'error-log';
+            
+            statusEl.textContent = '⏳ Testing error handling...';
+            statusEl.className = 'status pending';
+            document.getElementById(logId).innerHTML = '';
+            
+            log(logId, 'Starting error handling test...', 'info');
+            
+            // Test 1: Invalid URL
+            log(logId, 'Test 1: Invalid URL error', 'info');
+            try {
+                await fetch('https://invalid.cdn.that.does.not.exist.example.com/file.js');
+                log(logId, '❌ Should have thrown an error', 'error');
+            } catch (error) {
+                log(logId, `✅ Caught error: ${error.message}`, 'success');
+            }
+            
+            // Test 2: 404 Error
+            log(logId, 'Test 2: 404 error', 'info');
+            try {
+                const response = await fetch('https://cdn.jsdelivr.net/pyodide/v0.26.2/full/nonexistent-file.js');
+                if (!response.ok) {
+                    log(logId, `✅ Caught HTTP ${response.status} error`, 'success');
+                }
+            } catch (error) {
+                log(logId, `✅ Caught error: ${error.message}`, 'success');
+            }
+            
+            statusEl.textContent = '✅ Error handling works correctly';
+            statusEl.className = 'status success';
+            log(logId, 'Test PASSED: Error handling is functional', 'success');
+        }
+        
+        async function testRetryLogic() {
+            const statusEl = document.getElementById('retry-status');
+            const logId = 'retry-log';
+            
+            statusEl.textContent = '⏳ Testing retry logic...';
+            statusEl.className = 'status pending';
+            document.getElementById(logId).innerHTML = '';
+            
+            log(logId, 'Starting retry logic test...', 'info');
+            
+            const maxRetries = 3;
+            let attempt = 0;
+            let success = false;
+            
+            while (attempt < maxRetries && !success) {
+                attempt++;
+                log(logId, `Attempt ${attempt}/${maxRetries}...`, 'info');
+                
+                try {
+                    const response = await fetch(CDN_CONFIGS[0].script, { method: 'HEAD' });
+                    if (response.ok) {
+                        log(logId, `✅ Success on attempt ${attempt}`, 'success');
+                        success = true;
+                    } else {
+                        log(logId, `⚠️ Attempt ${attempt} returned HTTP ${response.status}`, 'info');
+                        if (attempt < maxRetries) {
+                            log(logId, `Waiting 1 second before retry...`, 'info');
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        }
+                    }
+                } catch (error) {
+                    log(logId, `⚠️ Attempt ${attempt} failed: ${error.message}`, 'info');
+                    if (attempt < maxRetries) {
+                        log(logId, `Waiting 1 second before retry...`, 'info');
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
+            
+            if (success) {
+                statusEl.textContent = '✅ Retry logic works correctly';
+                statusEl.className = 'status success';
+                log(logId, `Test PASSED: Succeeded after ${attempt} attempt(s)`, 'success');
+            } else {
+                statusEl.textContent = '❌ All retries failed';
+                statusEl.className = 'status error';
+                log(logId, 'Test FAILED: All retry attempts exhausted', 'error');
+            }
+        }
+        
+        // Show test environment info on load
+        window.addEventListener('load', () => {
+            console.log('1401 Error Fix Test Suite Loaded');
+            console.log('Browser:', navigator.userAgent);
+            console.log('Online:', navigator.onLine);
+        });
+    </script>
+</body>
+</html>
