@@ -32,8 +32,16 @@ echo ""
 
 # Build the game using pygbag
 # --build: Build mode (as opposed to dev/serve mode)
-# --template noctx.tmpl: Use no-context template (better compatibility)
-pygbag --build --template noctx.tmpl .
+# --template: Use template for better compatibility
+# --ume_block: Prevent blocking calls
+# --can_close: Allow game to be closed
+if pygbag --build --ume_block 0 --can_close 1 .; then
+    echo "✅ Pygbag build successful"
+else
+    echo "❌ Pygbag build failed"
+    echo "Try updating pygbag: pip install --upgrade pygbag"
+    exit 1
+fi
 
 echo ""
 echo "🎨 Enhancing web build with loading bar and error console..."

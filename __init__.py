@@ -17,5 +17,11 @@ __PYGBAG__ = {
     "title": "Undertale Clone",
     "version": "1.0.0",
     "archive": "undertale-clone",
-    "cdn": "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/",
+    # Primary CDN with fallback support
+    "cdn": "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/",
+    # Fallback CDNs for reliability
+    "cdn_fallback": [
+        "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/",
+        "https://cdnjs.cloudflare.com/ajax/libs/pyodide/0.26.2/",
+    ],
 }

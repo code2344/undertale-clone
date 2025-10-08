@@ -36,3 +36,14 @@ compression = 6
 
 # Enable asset caching
 cache_assets = true
+
+# Resource loading configuration
+[resources]
+# Timeout for resource loading (milliseconds)
+timeout = 30000
+
+# Retry failed loads
+retry_count = 3
+
+# Use CDN fallback for reliability
+cdn_fallback = true

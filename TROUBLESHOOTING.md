@@ -93,6 +93,55 @@ pip install --upgrade pygbag
 
 ## Runtime Issues
 
+### ❌ Error 1401 or CDN Loading Failures
+
+**Symptom:** Game throws 1401 errors, fails to load, or shows CDN-related errors
+
+**Causes:**
+- CDN (Content Delivery Network) temporarily unavailable
+- Incorrect Pyodide version specified
+- Network connectivity issues
+- Browser blocking CDN requests
+
+**Solutions:**
+
+1. **The game now has automatic CDN fallback** - It will try multiple CDN sources:
+   - jsDelivr (primary)
+   - cdnjs (fallback)
+   - Alternative jsDelivr versions
+   
+2. **Clear browser cache and retry:**
+   ```
+   Chrome/Edge: Ctrl+Shift+Delete (Windows) or Cmd+Shift+Delete (Mac)
+   Firefox: Ctrl+Shift+Delete
+   Safari: Cmd+Option+E
+   ```
+
+3. **Check your internet connection:**
+   - Ensure you have a stable internet connection
+   - Try disabling VPN or proxy if enabled
+   - Check if firewall is blocking CDN domains
+
+4. **Try a different browser:**
+   - Chrome, Firefox, Edge, or Safari (latest versions)
+   - Disable extensions that might block scripts
+
+5. **Manual CDN check:**
+   Open browser console (F12) and check for errors containing:
+   - `cdn.jsdelivr.net`
+   - `cdnjs.cloudflare.com`
+   - `pyodide`
+
+6. **Rebuild if you're developing:**
+   ```bash
+   # Update pygbag to latest version
+   pip install --upgrade pygbag
+   
+   # Clean rebuild
+   rm -rf build/ .pygbag/
+   ./build.sh
+   ```
+
 ### ❌ Game doesn't load - blank screen
 
 **Symptom:** Browser shows blank or loading screen forever

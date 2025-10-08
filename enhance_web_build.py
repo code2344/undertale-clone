@@ -285,6 +285,13 @@ def inject_loading_and_console(html_path):
     # JavaScript for managing loading and errors
     enhanced_js = """
     <script id="enhanced-ui-script">
+        // CDN Fallback configuration
+        const PYODIDE_CDN_FALLBACKS = [
+            'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/',
+            'https://cdnjs.cloudflare.com/ajax/libs/pyodide/0.26.2/',
+            'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
+        ];
+
         // Loading Manager
         class LoadingManager {
             constructor() {
@@ -311,6 +318,20 @@ def inject_loading_and_console(html_path):
                 setTimeout(() => {
                     if (this.loadingScreen) this.loadingScreen.classList.add('hidden');
                 }, 500);
+            }
+
+            showError(message) {
+                if (this.loadingStatus) {
+                    this.loadingStatus.innerHTML = `
+                        <div style="color: #ff4444; padding: 10px;">
+                            <strong>❌ Error:</strong> ${message}
+                            <br><button onclick="location.reload()" 
+                                style="margin-top: 10px; padding: 5px 15px; cursor: pointer;">
+                                Retry
+                            </button>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -341,7 +362,13 @@ def inject_loading_and_console(html_path):
                 };
 
                 window.addEventListener('error', (event) => {
-                    self.addError('error', `${event.message} (${event.filename}:${event.lineno})`);
+                    const msg = `${event.message} (${event.filename}:${event.lineno})`;
+                    self.addError('error', msg);
+                    
+                    // Check for common CDN errors
+                    if (msg.includes('cdn.jsdelivr.net') || msg.includes('cdnjs.cloudflare.com')) {
+                        console.log('CDN error detected, fallback may be triggered');
+                    }
                 });
 
                 window.addEventListener('unhandledrejection', (event) => {
@@ -409,6 +436,10 @@ def inject_loading_and_console(html_path):
                 completeLoading: () => {
                     if (loadingManager) loadingManager.complete();
                 },
+                showError: (msg) => {
+                    if (loadingManager) loadingManager.showError(msg);
+                    if (errorConsole) errorConsole.log(msg, 'error');
+                },
                 logError: (msg) => {
                     if (errorConsole) errorConsole.log(msg, 'error');
                 },
@@ -419,6 +450,26 @@ def inject_loading_and_console(html_path):
                     if (errorConsole) errorConsole.log(msg, 'info');
                 }
             };
+
+            // Monitor for resource loading errors
+            monitorResourceLoading();
+        }
+
+        function monitorResourceLoading() {
+            // Track resource loading
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (entry.name.includes('pyodide') || entry.name.includes('wasm')) {
+                        console.log(`Resource loaded: ${entry.name}`);
+                    }
+                }
+            });
+            
+            try {
+                observer.observe({ entryTypes: ['resource'] });
+            } catch (e) {
+                console.log('Performance observer not supported');
+            }
         }
 
         function toggleConsole() {
