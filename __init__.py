@@ -17,5 +17,5 @@ __PYGBAG__ = {
     "title": "Undertale Clone",
     "version": "1.0.0",
     "archive": "undertale-clone",
-    "cdn": "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/",
+    "cdn": "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/",
 }
