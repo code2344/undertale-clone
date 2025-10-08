@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Bar & Error Console Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #f0f0f0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .demo-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .demo-section h2 {
+            margin-bottom: 15px;
+            color: #4CAF50;
+        }
+
+        .demo-section p {
+            margin-bottom: 15px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .btn-error {
+            background: #ff4444;
+        }
+
+        .btn-error:hover {
+            background: #ff6666;
+        }
+
+        .btn-warning {
+            background: #ffaa44;
+        }
+
+        .btn-warning:hover {
+            background: #ffcc66;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #loading-screen.visible {
+            display: flex;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            text-align: center;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .loading-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #f0f0f0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .loading-status {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            color: #aaa;
+            min-height: 30px;
+        }
+
+        .loading-bar-container {
+            width: 100%;
+            height: 30px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #555;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            width: 0%;
+            transition: width 0.3s ease-out;
+            position: relative;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .loading-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        /* Error Console */
+        #error-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 250px;
+            background: rgba(20, 20, 20, 0.95);
+            border-top: 2px solid #ff4444;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #ff6666;
+            padding: 10px;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+
+        #error-console.visible {
+            display: block;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border-bottom: 1px solid #ff4444;
+            margin: -10px -10px 10px -10px;
+        }
+
+        .console-title {
+            font-weight: bold;
+            color: #ff8888;
+        }
+
+        .console-toggle {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            padding: 3px 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .console-toggle:hover {
+            background: rgba(255, 68, 68, 0.2);
+            border-color: #ff6666;
+        }
+
+        .error-message {
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(255, 68, 68, 0.05);
+            border-left: 3px solid #ff4444;
+            word-wrap: break-word;
+        }
+
+        .error-timestamp {
+            color: #888;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .error-level-error {
+            border-left-color: #ff4444;
+        }
+
+        .error-level-warning {
+            border-left-color: #ffaa44;
+            color: #ffcc66;
+        }
+
+        .error-level-info {
+            border-left-color: #4444ff;
+            color: #6666ff;
+        }
+
+        #error-toggle-btn {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 68, 68, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 10001;
+            display: none;
+            transition: all 0.3s;
+        }
+
+        #error-toggle-btn:hover {
+            background: rgba(255, 68, 68, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+        }
+
+        #error-toggle-btn.has-errors {
+            display: block;
+            animation: attention 2s ease-in-out infinite;
+        }
+
+        @keyframes attention {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .error-count {
+            background: #fff;
+            color: #ff4444;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Demo Content -->
+    <div class="demo-container">
+        <h1>🎮 Loading Bar & Error Console Demo</h1>
+
+        <div class="demo-section">
+            <h2>Loading Bar</h2>
+            <p>Click the button below to see the loading bar animation:</p>
+            <div class="controls">
+                <button class="btn" onclick="showLoadingDemo()">Show Loading Bar</button>
+                <button class="btn" onclick="resetLoading()">Reset</button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Error Console</h2>
+            <p>Test the error console by adding different types of messages:</p>
+            <div class="controls">
+                <button class="btn btn-error" onclick="addTestError()">Add Error</button>
+                <button class="btn btn-warning" onclick="addTestWarning()">Add Warning</button>
+                <button class="btn" onclick="addTestInfo()">Add Info</button>
+                <button class="btn" onclick="clearErrors()">Clear Console</button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Features</h2>
+            <p>✅ Smooth animated loading bar with shimmer effect</p>
+            <p>✅ Real-time percentage and status updates</p>
+            <p>✅ Color-coded error messages (Error/Warning/Info)</p>
+            <p>✅ Timestamps for each message</p>
+            <p>✅ Collapsible error console</p>
+            <p>✅ Error counter badge</p>
+            <p>✅ Auto-show on first error</p>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-title">🎮 UNDERTALE CLONE 🎮</div>
+            <div class="loading-status" id="loading-status">Initializing...</div>
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loading-bar"></div>
+                <div class="loading-percentage" id="loading-percentage">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Console -->
+    <div id="error-console">
+        <div class="console-header">
+            <span class="console-title">⚠️ Error Console</span>
+            <button class="console-toggle" onclick="toggleConsole()">Hide</button>
+        </div>
+        <div id="error-log"></div>
+    </div>
+
+    <!-- Error Toggle Button -->
+    <button id="error-toggle-btn" onclick="toggleConsole()">
+        Errors <span class="error-count" id="error-count">0</span>
+    </button>
+
+    <script>
+        let errors = [];
+        let isConsoleVisible = false;
+
+        function setLoadingProgress(percent, status) {
+            const bar = document.getElementById('loading-bar');
+            const percentage = document.getElementById('loading-percentage');
+            const statusEl = document.getElementById('loading-status');
+            
+            bar.style.width = percent + '%';
+            percentage.textContent = Math.round(percent) + '%';
+            if (status) statusEl.textContent = status;
+        }
+
+        function showLoadingDemo() {
+            const screen = document.getElementById('loading-screen');
+            screen.classList.add('visible');
+            screen.classList.remove('hidden');
+            
+            const stages = [
+                { percent: 10, status: 'Initializing game...', delay: 500 },
+                { percent: 30, status: 'Loading game modules...', delay: 700 },
+                { percent: 50, status: 'Loading assets...', delay: 700 },
+                { percent: 70, status: 'Initializing systems...', delay: 700 },
+                { percent: 90, status: 'Starting game loop...', delay: 500 },
+                { percent: 100, status: 'Ready!', delay: 300 }
+            ];
+            
+            let currentStage = 0;
+            
+            function nextStage() {
+                if (currentStage < stages.length) {
+                    const stage = stages[currentStage];
+                    setLoadingProgress(stage.percent, stage.status);
+                    currentStage++;
+                    setTimeout(nextStage, stage.delay);
+                } else {
+                    setTimeout(() => {
+                        screen.classList.add('hidden');
+                    }, 500);
+                }
+            }
+            
+            setLoadingProgress(0, 'Initializing...');
+            setTimeout(nextStage, 300);
+        }
+
+        function resetLoading() {
+            const screen = document.getElementById('loading-screen');
+            screen.classList.remove('visible', 'hidden');
+            setLoadingProgress(0, 'Initializing...');
+        }
+
+        function addError(level, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            errors.push({ level, message, timestamp });
+            
+            const errorLog = document.getElementById('error-log');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = `error-message error-level-${level}`;
+            errorDiv.innerHTML = `
+                <span class="error-timestamp">[${timestamp}]</span>
+                <span>${message}</span>
+            `;
+            
+            errorLog.appendChild(errorDiv);
+            errorLog.scrollTop = errorLog.scrollHeight;
+            
+            document.getElementById('error-count').textContent = errors.length;
+            document.getElementById('error-toggle-btn').classList.add('has-errors');
+            
+            if (errors.length === 1) {
+                showConsole();
+            }
+        }
+
+        function addTestError() {
+            const messages = [
+                'Failed to load resource: sprites/character.png',
+                'Uncaught TypeError: Cannot read property "x" of undefined',
+                'Network error: Failed to fetch game data',
+                'RuntimeError: Maximum call stack exceeded'
+            ];
+            addError('error', messages[Math.floor(Math.random() * messages.length)]);
+        }
+
+        function addTestWarning() {
+            const messages = [
+                'Deprecated function call: use newFunction() instead',
+                'Performance warning: Frame rate dropped below 30fps',
+                'Asset size warning: sprite.png is larger than recommended',
+                'Browser compatibility: This feature may not work in older browsers'
+            ];
+            addError('warning', messages[Math.floor(Math.random() * messages.length)]);
+        }
+
+        function addTestInfo() {
+            const messages = [
+                'Game initialized successfully',
+                'Loading complete: 245 assets loaded',
+                'Save file loaded from slot 1',
+                'Music started: Ruins theme'
+            ];
+            addError('info', messages[Math.floor(Math.random() * messages.length)]);
+        }
+
+        function clearErrors() {
+            errors = [];
+            document.getElementById('error-log').innerHTML = '';
+            document.getElementById('error-count').textContent = '0';
+            document.getElementById('error-toggle-btn').classList.remove('has-errors');
+            hideConsole();
+        }
+
+        function toggleConsole() {
+            if (isConsoleVisible) {
+                hideConsole();
+            } else {
+                showConsole();
+            }
+        }
+
+        function showConsole() {
+            document.getElementById('error-console').classList.add('visible');
+            isConsoleVisible = true;
+        }
+
+        function hideConsole() {
+            document.getElementById('error-console').classList.remove('visible');
+            isConsoleVisible = false;
+        }
+    </script>
+</body>
+</html>

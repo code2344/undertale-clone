@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Undertale Clone - Play in your browser">
+    <title>Undertale Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 1280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            text-align: center;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .loading-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #f0f0f0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .loading-status {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            color: #aaa;
+            min-height: 30px;
+        }
+
+        /* Loading Bar Container */
+        .loading-bar-container {
+            width: 100%;
+            height: 30px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #555;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Loading Bar */
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            width: 0%;
+            transition: width 0.3s ease-out;
+            position: relative;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .loading-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        /* Game Canvas */
+        #pygame-canvas {
+            display: none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border: 3px solid #444;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            background: #000;
+        }
+
+        #pygame-canvas.loaded {
+            display: block;
+        }
+
+        /* Error Console */
+        #error-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 250px;
+            background: rgba(20, 20, 20, 0.95);
+            border-top: 2px solid #ff4444;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #ff6666;
+            padding: 10px;
+            display: none;
+            z-index: 999;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+
+        #error-console.visible {
+            display: block;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border-bottom: 1px solid #ff4444;
+            margin: -10px -10px 10px -10px;
+        }
+
+        .console-title {
+            font-weight: bold;
+            color: #ff8888;
+        }
+
+        .console-toggle {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            padding: 3px 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .console-toggle:hover {
+            background: rgba(255, 68, 68, 0.2);
+            border-color: #ff6666;
+        }
+
+        .error-message {
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(255, 68, 68, 0.05);
+            border-left: 3px solid #ff4444;
+            word-wrap: break-word;
+        }
+
+        .error-timestamp {
+            color: #888;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .error-level-error {
+            border-left-color: #ff4444;
+        }
+
+        .error-level-warning {
+            border-left-color: #ffaa44;
+            color: #ffcc66;
+        }
+
+        .error-level-info {
+            border-left-color: #4444ff;
+            color: #6666ff;
+        }
+
+        /* Controls Info */
+        .controls-info {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            max-width: 600px;
+            display: none;
+        }
+
+        .controls-info.visible {
+            display: block;
+        }
+
+        .controls-info h3 {
+            margin-bottom: 10px;
+            color: #f0f0f0;
+        }
+
+        .controls-info p {
+            margin: 5px 0;
+            color: #ccc;
+            font-size: 0.95em;
+        }
+
+        /* Error Toggle Button */
+        #error-toggle-btn {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 68, 68, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 1001;
+            display: none;
+            transition: all 0.3s;
+        }
+
+        #error-toggle-btn:hover {
+            background: rgba(255, 68, 68, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+        }
+
+        #error-toggle-btn.has-errors {
+            display: block;
+            animation: attention 2s ease-in-out infinite;
+        }
+
+        @keyframes attention {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .error-count {
+            background: #fff;
+            color: #ff4444;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-title">🎮 UNDERTALE CLONE 🎮</div>
+            <div class="loading-status" id="loading-status">Initializing...</div>
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loading-bar"></div>
+                <div class="loading-percentage" id="loading-percentage">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <canvas id="pygame-canvas"></canvas>
+        
+        <div class="controls-info" id="controls-info">
+            <h3>Controls</h3>
+            <p><strong>Arrow Keys:</strong> Move</p>
+            <p><strong>Z / Enter:</strong> Accept/Confirm</p>
+            <p><strong>X / Shift:</strong> Cancel</p>
+            <p><strong>C / Ctrl:</strong> Menu</p>
+        </div>
+    </div>
+
+    <!-- Error Console -->
+    <div id="error-console">
+        <div class="console-header">
+            <span class="console-title">⚠️ Error Console</span>
+            <button class="console-toggle" onclick="toggleConsole()">Hide</button>
+        </div>
+        <div id="error-log"></div>
+    </div>
+
+    <!-- Error Toggle Button -->
+    <button id="error-toggle-btn" onclick="toggleConsole()">
+        Errors <span class="error-count" id="error-count">0</span>
+    </button>
+
+    <script>
+        // Loading Progress Manager
+        class LoadingManager {
+            constructor() {
+                this.progress = 0;
+                this.status = 'Initializing...';
+                this.loadingBar = document.getElementById('loading-bar');
+                this.loadingPercentage = document.getElementById('loading-percentage');
+                this.loadingStatus = document.getElementById('loading-status');
+                this.loadingScreen = document.getElementById('loading-screen');
+            }
+
+            setProgress(percent) {
+                this.progress = Math.min(100, Math.max(0, percent));
+                this.loadingBar.style.width = this.progress + '%';
+                this.loadingPercentage.textContent = Math.round(this.progress) + '%';
+            }
+
+            setStatus(status) {
+                this.status = status;
+                this.loadingStatus.textContent = status;
+            }
+
+            complete() {
+                this.setProgress(100);
+                this.setStatus('Ready!');
+                setTimeout(() => {
+                    this.loadingScreen.classList.add('hidden');
+                    document.getElementById('pygame-canvas').classList.add('loaded');
+                    document.getElementById('controls-info').classList.add('visible');
+                }, 500);
+            }
+        }
+
+        // Error Console Manager
+        class ErrorConsole {
+            constructor() {
+                this.errors = [];
+                this.console = document.getElementById('error-console');
+                this.errorLog = document.getElementById('error-log');
+                this.errorToggleBtn = document.getElementById('error-toggle-btn');
+                this.errorCount = document.getElementById('error-count');
+                this.isVisible = false;
+
+                // Capture console errors
+                this.captureErrors();
+            }
+
+            captureErrors() {
+                const self = this;
+                
+                // Capture console.error
+                const originalError = console.error;
+                console.error = function(...args) {
+                    self.addError('error', args.join(' '));
+                    originalError.apply(console, args);
+                };
+
+                // Capture console.warn
+                const originalWarn = console.warn;
+                console.warn = function(...args) {
+                    self.addError('warning', args.join(' '));
+                    originalWarn.apply(console, args);
+                };
+
+                // Capture window errors
+                window.addEventListener('error', (event) => {
+                    self.addError('error', `${event.message} (${event.filename}:${event.lineno})`);
+                });
+
+                // Capture unhandled promise rejections
+                window.addEventListener('unhandledrejection', (event) => {
+                    self.addError('error', `Unhandled Promise Rejection: ${event.reason}`);
+                });
+            }
+
+            addError(level, message) {
+                const timestamp = new Date().toLocaleTimeString();
+                this.errors.push({ level, message, timestamp });
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = `error-message error-level-${level}`;
+                errorDiv.innerHTML = `
+                    <span class="error-timestamp">[${timestamp}]</span>
+                    <span>${this.escapeHtml(message)}</span>
+                `;
+                
+                this.errorLog.appendChild(errorDiv);
+                this.errorLog.scrollTop = this.errorLog.scrollHeight;
+
+                // Update error count
+                this.errorCount.textContent = this.errors.length;
+                this.errorToggleBtn.classList.add('has-errors');
+
+                // Auto-show console on first error
+                if (this.errors.length === 1) {
+                    this.show();
+                }
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            show() {
+                this.console.classList.add('visible');
+                this.isVisible = true;
+            }
+
+            hide() {
+                this.console.classList.remove('visible');
+                this.isVisible = false;
+            }
+
+            toggle() {
+                if (this.isVisible) {
+                    this.hide();
+                } else {
+                    this.show();
+                }
+            }
+
+            log(message, level = 'info') {
+                this.addError(level, message);
+            }
+        }
+
+        // Global instances
+        let loadingManager;
+        let errorConsole;
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadingManager = new LoadingManager();
+            errorConsole = new ErrorConsole();
+            
+            // Make them globally accessible
+            window.loadingManager = loadingManager;
+            window.errorConsole = errorConsole;
+
+            // Simulate loading progress (this will be replaced by actual Pygbag integration)
+            simulateLoading();
+        });
+
+        function toggleConsole() {
+            if (errorConsole) {
+                errorConsole.toggle();
+            }
+        }
+
+        // Simulated loading (for demonstration - Pygbag will provide real progress)
+        function simulateLoading() {
+            const stages = [
+                { progress: 10, status: 'Loading Python runtime...', delay: 500 },
+                { progress: 30, status: 'Initializing WebAssembly...', delay: 800 },
+                { progress: 50, status: 'Loading game assets...', delay: 1000 },
+                { progress: 70, status: 'Loading sprites and music...', delay: 1200 },
+                { progress: 90, status: 'Initializing game engine...', delay: 500 },
+                { progress: 100, status: 'Starting game...', delay: 300 }
+            ];
+
+            let currentStage = 0;
+
+            function nextStage() {
+                if (currentStage < stages.length) {
+                    const stage = stages[currentStage];
+                    loadingManager.setProgress(stage.progress);
+                    loadingManager.setStatus(stage.status);
+                    currentStage++;
+                    setTimeout(nextStage, stage.delay);
+                } else {
+                    loadingManager.complete();
+                }
+            }
+
+            nextStage();
+        }
+
+        // Expose API for Python integration
+        window.gameAPI = {
+            setLoadingProgress: (percent, status) => {
+                if (loadingManager) {
+                    loadingManager.setProgress(percent);
+                    if (status) loadingManager.setStatus(status);
+                }
+            },
+            completeLoading: () => {
+                if (loadingManager) {
+                    loadingManager.complete();
+                }
+            },
+            logError: (message) => {
+                if (errorConsole) {
+                    errorConsole.log(message, 'error');
+                }
+            },
+            logWarning: (message) => {
+                if (errorConsole) {
+                    errorConsole.log(message, 'warning');
+                }
+            },
+            logInfo: (message) => {
+                if (errorConsole) {
+                    errorConsole.log(message, 'info');
+                }
+            }
+        };
+    </script>
+
+    <!-- Pygbag will inject its loader script here -->
+    <!-- The actual game loading happens through Pygbag's system -->
+</body>
+</html>

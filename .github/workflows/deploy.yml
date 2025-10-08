@@ -46,6 +46,11 @@ jobs:
           # --template noctx.tmpl: Use no-context template for better compatibility
           pygbag --build --template noctx.tmpl .
       
+      - name: Enhance web build
+        run: |
+          echo "🎨 Adding loading bar and error console..."
+          python3 enhance_web_build.py
+      
       - name: Verify build output
         run: |
           echo "Build complete. Checking output..."
