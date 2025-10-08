@@ -48,6 +48,10 @@ echo "🎨 Enhancing web build with loading bar and error console..."
 python3 enhance_web_build.py
 
 echo ""
+echo "🔧 Fixing CDN references and downloading runtime files..."
+python3 fix_cdn_references.py
+
+echo ""
 echo "✅ Build complete!"
 echo ""
 echo "📁 Output directory: build/web/"

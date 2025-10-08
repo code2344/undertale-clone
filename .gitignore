@@ -29,4 +29,5 @@ Thumbs.db
 .pygbag/
 web/
 *.data
-*.html.mem
+*.html.membuild/
+pygbag-cdn/
