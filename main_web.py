@@ -205,6 +205,16 @@ async def async_main():
         WebConsole.log_info("Game stopped")
 
 
+# Pygbag entry point: Pygbag looks for an async function called 'main' at module level
+# This is the standard entry point for Pygbag applications
+async def main():
+    """
+    Pygbag entry point - this function is called automatically by Pygbag.
+    Delegates to async_main() which contains the actual game initialization.
+    """
+    await async_main()
+
+
 if __name__ == "__main__":
     # Run async main loop
     if IS_WASM or IS_PYGBAG:
