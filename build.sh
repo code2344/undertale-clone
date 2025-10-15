@@ -35,7 +35,8 @@ echo ""
 # --template: Use template for better compatibility
 # --ume_block: Prevent blocking calls
 # --can_close: Allow game to be closed
-if pygbag --build --ume_block 0 --can_close 1 .; then
+# --PYBUILD: Python version (3.12)
+if pygbag --build --ume_block 0 --can_close 1 --PYBUILD 3.12 .; then
     echo "✅ Pygbag build successful"
 else
     echo "❌ Pygbag build failed"

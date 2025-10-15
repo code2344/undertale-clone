@@ -501,11 +501,16 @@ def inject_loading_and_console(html_path):
     if '</body>' in html_content:
         html_content = html_content.replace('</body>', f'{enhanced_js}\n</body>')
     
+    # Enable autorun by changing autorun : 0 to autorun : 1
+    # This allows the game to start automatically
+    html_content = html_content.replace('autorun : 0,', 'autorun : 1,')
+    
     # Write the enhanced HTML
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
     print("✅ Enhanced HTML with loading bar and error console")
+    print("✅ Enabled autorun for automatic game start")
     return True
 
 def main():

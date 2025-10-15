@@ -9,6 +9,9 @@ import asyncio
 import sys
 import os
 
+# Import pygame for display initialization
+import pygame
+
 # Platform detection for WebAssembly
 try:
     import platform
@@ -149,6 +152,24 @@ async def async_main():
         LoadingProgress.set_progress(10, "Initializing game...")
         WebConsole.log_info("Starting Undertale Clone...")
         
+        # Initialize pygame if not already initialized
+        if not pygame.get_init():
+            pygame.init()
+        
+        # In Pygbag/WebAssembly, get the existing display surface
+        # Pygbag creates the display before our code runs
+        if IS_WASM or IS_PYGBAG:
+            globals.display = pygame.display.get_surface()
+            if globals.display is None:
+                # Fallback: create display if it doesn't exist
+                WebConsole.log_warning("Display surface not found, creating new one")
+                globals.display = pygame.display.set_mode((640, 480))
+        else:
+            # Desktop mode: create display normally
+            globals.display = pygame.display.set_mode((640, 480))
+        
+        WebConsole.log_info(f"Display initialized: {globals.display.get_size()}")
+        
         LoadingProgress.set_progress(30, "Loading game modules...")
         main.init()
         
@@ -184,18 +205,25 @@ async def async_main():
         WebConsole.log_info("Game stopped")
 
 
+# Pygbag entry point: Pygbag looks for an async function called 'main' at module level
+# This is the standard entry point for Pygbag applications
+async def main():
+    """
+    Pygbag entry point - this function is called automatically by Pygbag.
+    Delegates to async_main() which contains the actual game initialization.
+    """
+    await async_main()
+
+
 if __name__ == "__main__":
-    # Run async main loop
-    if IS_WASM or IS_PYGBAG:
-        # In WebAssembly/Pygbag, use asyncio
-        asyncio.run(async_main())
-    else:
-        # Fallback to sync version for native execution
-        try:
-            main.init()
-            main.maincycle()
-        except Exception as e:
-            print(f"Error: {e}")
-            import traceback
-            traceback.print_exc()
+    # Desktop execution mode (not Pygbag)
+    # Pygbag will NOT execute this block - it directly calls main() above
+    try:
+        # Regular desktop execution - pygame and main are already imported
+        main.init()
+        main.maincycle()
+    except Exception as e:
+        print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
 

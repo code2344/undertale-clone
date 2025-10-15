@@ -11,6 +11,19 @@ from pygame.locals import *
 
 # our modules are imported below the invoke_dog function
 
+# Platform detection for WebAssembly
+try:
+    import platform
+    IS_WASM = platform.system() == "Emscripten"
+except:
+    IS_WASM = False
+
+# Check if we're running in a Pygbag environment
+try:
+    import pygbag
+    IS_PYGBAG = True
+except ImportError:
+    IS_PYGBAG = False
 
 global clock
 clock = None
@@ -183,7 +196,18 @@ if __name__ == "__main__":
     try:
         import globals
 
-        globals.display = pygame.display.set_mode((640, 480))
+        # In WebAssembly/Pygbag, the display is already created
+        # Using pygame.display.set_mode() again will cause errors
+        if IS_WASM or IS_PYGBAG:
+            # Get the existing display surface created by Pygbag
+            globals.display = pygame.display.get_surface()
+            if globals.display is None:
+                # Fallback: if no surface exists, create one
+                globals.display = pygame.display.set_mode((640, 480))
+        else:
+            # Desktop mode: create the display normally
+            globals.display = pygame.display.set_mode((640, 480))
+        
         import frisk
         import rooms
         import sprite
@@ -208,6 +232,21 @@ if __name__ == "__main__":
 
 
 def init():
+    """
+    Initialize the game.
+    In WebAssembly/Pygbag mode, assumes pygame is already initialized and display exists.
+    """
+    import globals
+    
+    # In WebAssembly/Pygbag, ensure we have the display surface
+    if IS_WASM or IS_PYGBAG:
+        if globals.display is None or globals.display.get_width() == 1:
+            # Get the existing display surface created by Pygbag
+            globals.display = pygame.display.get_surface()
+            if globals.display is None:
+                # Fallback: if no surface exists, create one
+                globals.display = pygame.display.set_mode((640, 480))
+    
     globals.start_time = time.time()
     global clock
     clock = pygame.time.Clock()
