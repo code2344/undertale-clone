@@ -216,17 +216,23 @@ async def main():
 
 
 if __name__ == "__main__":
-    # Run async main loop
-    if IS_WASM or IS_PYGBAG:
-        # In WebAssembly/Pygbag, use asyncio
-        asyncio.run(async_main())
-    else:
-        # Fallback to sync version for native execution
-        try:
-            main.init()
-            main.maincycle()
-        except Exception as e:
-            print(f"Error: {e}")
-            import traceback
-            traceback.print_exc()
+    # Desktop execution mode (not Pygbag)
+    # Pygbag will NOT execute this block - it directly calls main() above
+    try:
+        # Try importing pygame to check if we're in a regular Python environment
+        import pygame
+        pygame.init()
+        
+        # Regular desktop execution
+        import globals
+        globals.display = pygame.display.set_mode((640, 480))
+        
+        # Import and run the synchronous main
+        import main as game_main
+        game_main.init()
+        game_main.maincycle()
+    except Exception as e:
+        print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
 
