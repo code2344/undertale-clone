@@ -9,6 +9,9 @@ import asyncio
 import sys
 import os
 
+# Import pygame for display initialization
+import pygame
+
 # Platform detection for WebAssembly
 try:
     import platform
@@ -148,6 +151,24 @@ async def async_main():
     try:
         LoadingProgress.set_progress(10, "Initializing game...")
         WebConsole.log_info("Starting Undertale Clone...")
+        
+        # Initialize pygame if not already initialized
+        if not pygame.get_init():
+            pygame.init()
+        
+        # In Pygbag/WebAssembly, get the existing display surface
+        # Pygbag creates the display before our code runs
+        if IS_WASM or IS_PYGBAG:
+            globals.display = pygame.display.get_surface()
+            if globals.display is None:
+                # Fallback: create display if it doesn't exist
+                WebConsole.log_warning("Display surface not found, creating new one")
+                globals.display = pygame.display.set_mode((640, 480))
+        else:
+            # Desktop mode: create display normally
+            globals.display = pygame.display.set_mode((640, 480))
+        
+        WebConsole.log_info(f"Display initialized: {globals.display.get_size()}")
         
         LoadingProgress.set_progress(30, "Loading game modules...")
         main.init()
