@@ -219,18 +219,9 @@ if __name__ == "__main__":
     # Desktop execution mode (not Pygbag)
     # Pygbag will NOT execute this block - it directly calls main() above
     try:
-        # Try importing pygame to check if we're in a regular Python environment
-        import pygame
-        pygame.init()
-        
-        # Regular desktop execution
-        import globals
-        globals.display = pygame.display.set_mode((640, 480))
-        
-        # Import and run the synchronous main
-        import main as game_main
-        game_main.init()
-        game_main.maincycle()
+        # Regular desktop execution - pygame and main are already imported
+        main.init()
+        main.maincycle()
     except Exception as e:
         print(f"Error: {e}")
         import traceback
